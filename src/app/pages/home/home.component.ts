@@ -11,10 +11,10 @@ import Chart from 'chart.js/auto';
 export class HomeComponent implements OnInit {
   private olympicUrl = './assets/mock/olympic.json';
   public pieChart!: Chart<"pie", number[], string>;
-  public totalCountries: number = 0
-  public totalJOs: number = 0
+  public totalCountries = 0
+  public totalJOs = 0
   public error!:string
-  titlePage: string = "Medals per Country";
+  titlePage = "Medals per Country";
 
   constructor(private router: Router, private http:HttpClient) { }
 

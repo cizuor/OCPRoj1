@@ -12,10 +12,10 @@ import Chart from 'chart.js/auto';
 export class CountryComponent implements OnInit {
   private olympicUrl = './assets/mock/olympic.json';
   public lineChart!: Chart<"line", string[], number>;
-  public titlePage: string = '';
+  public titlePage = '';
   public totalEntries: any = 0;
-  public totalMedals: number = 0;
-  public totalAthletes: number = 0;
+  public totalMedals = 0;
+  public totalAthletes = 0;
   public error!: string;
 
   constructor(private route: ActivatedRoute, private router: Router, private http: HttpClient) {
