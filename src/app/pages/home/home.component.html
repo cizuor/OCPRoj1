@@ -3,18 +3,20 @@
 <div>
   <div>
     <div class="center">
-      <div>{{ titlePage }}</div>
+      <div><h2>{{ titlePage }}</h2></div>
     </div>
     <div class="split">
-      <div>
+      <div class="stat-left">
         <p>Number of countries</p>
         <p>{{ totalCountries }}</p>
       </div>
-      <div>
+      <div class="stat-right">
         <p>Number of JOs</p>
         <p>{{ totalJOs }}</p>
       </div>
     </div>
   </div>
+  <div style="width: 45%; margin: auto;">
   <canvas id="DashboardPieChart">{{ pieChart }}</canvas>
+  </div>
 </div>

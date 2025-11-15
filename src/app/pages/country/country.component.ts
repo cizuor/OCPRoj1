@@ -2,7 +2,7 @@ import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, ParamMap, Router} from '@angular/router';
 import Chart from 'chart.js/auto';
-import { CountryData } from '../../core/models/olympic.model';
+import { CountryData,CountryDataJSON,Participation } from '../../models/olympic.model';
 
 
 @Component({
@@ -25,55 +25,73 @@ export class CountryComponent implements OnInit {
   ngOnInit() {
     let countryName: string | null = null
     this.route.paramMap.subscribe((param: ParamMap) => countryName = param.get('countryName'));
-    this.http.get<CountryData[]>(this.olympicUrl).subscribe(
-      (data) => {
-        if (!countryName) { /* si il n'y a pas de nom au pays on peu rien en faire */ 
-          this.error = 'No country provided in route.';
-          return;
-        }
-        const selectedCountry = data.find(c => c.country === countryName); /* on cherche si le pays existe */
+    this.http.get<CountryDataJSON[]>(this.olympicUrl).subscribe({
+      next: (rawData) => {
+            try {
+              // Transformer le JSON en instances de classe
+              const data: CountryData[] = rawData.map(
+                (c) =>
+                  new CountryData(
+                    c.id,
+                    c.country,
+                    c.participations.map(
+                      (p) =>
+                        new Participation(
+                          p.year,
+                          p.city,
+                          p.medalsCount,
+                          p.athleteCount
+                        )
+                    )
+                  )
+              );
+            if (!countryName) { /* si il n'y a pas de nom au pays on peu rien en faire */ 
+              this.error = 'No country provided in route.';
+              return;
+            }
+            const selectedCountry = data.find(c => c.country === countryName); /* on cherche si le pays existe */
 
-        if (!selectedCountry) { /* si le pays n'est pas dans la liste on peu rien en faire */ 
-          this.error = 'Country not found.';
-          return;
-        }
-        /* on affiche les donné grace a l'objet pays obtenue */
-        this.titlePage = selectedCountry.country;
+            if (!selectedCountry) { /* si le pays n'est pas dans la liste on peu rien en faire */ 
+              this.error = 'Country not found.';
+              return;
+            }
+            /* on affiche les donné grace a l'objet pays obtenue */
+            this.titlePage = selectedCountry.country;
 
-        const participations = selectedCountry.participations;
+            const participations = selectedCountry.participations;
 
-        this.totalEntries = participations.length;
-        const years = participations.map(p => p.year);
-        const medals = participations.map(p => p.medalsCount);
-        const athletes = participations.map(p => p.athleteCount);
+            this.totalEntries = participations.length;
+            const years = participations.map(p => p.year);
+            const medals = participations.map(p => p.medalsCount);
+            const athletes = participations.map(p => p.athleteCount);
 
-        this.totalMedals = medals.reduce((acc, m) => acc + m, 0);
-        this.totalAthletes = athletes.reduce((acc, a) => acc + a, 0);
+            this.totalMedals = medals.reduce((acc, m) => acc + m, 0);
+            this.totalAthletes = athletes.reduce((acc, a) => acc + a, 0);
 
-        this.buildChart(years, medals);
+            this.buildChart(years, medals);
+            } catch (e) {
+              console.error('Error processing Olympic data:', e);
+              this.error = 'Error processing data';
+          }
+        },
+      error: (error: HttpErrorResponse) => {
+        console.error('HTTP error loading Olympic data:', error);
+        this.error = error.message || 'Unknown error';
+    },
+  });
+}
 
-
-        /* ancien code garder au cas ou  */
-        /*if (data && data.length > 0) {
-          const selectedCountry = data.find((i: any) => i.country === countryName);
-          this.titlePage = selectedCountry.country;
-          const participations = selectedCountry?.participations.map((i: any) => i);
-          this.totalEntries = participations?.length ?? 0;
-          const years = selectedCountry?.participations.map((i: any) => i.year) ?? [];
-          const medals = selectedCountry?.participations.map((i: any) => i.medalsCount.toString()) ?? [];
-          this.totalMedals = medals.reduce((accumulator: any, item: any) => accumulator + parseInt(item), 0);
-          const nbAthletes = selectedCountry?.participations.map((i: any) => i.athleteCount.toString()) ?? []
-          this.totalAthletes = nbAthletes.reduce((accumulator: any, item: any) => accumulator + parseInt(item), 0);
-          this.buildChart(years, medals);
-        }*/
-      },
-      (error: HttpErrorResponse) => {
-        this.error = error.message
-      }
-    );
-  }
 
   buildChart(years: number[], medals: number[]) {
+    // on delete si il existe déja pour pas crée de fuite mêmoire
+    if (this.lineChart) {
+      try {
+        this.lineChart.destroy();
+      } catch {
+        // ignore errors on destroy
+      }
+    }
+
     const lineChart = new Chart("countryChart", {
       type: 'line',
       data: {
