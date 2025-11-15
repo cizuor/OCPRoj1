@@ -5,6 +5,7 @@ import Chart from 'chart.js/auto';
 import type { Chart as ChartJS, ChartEvent, ActiveElement, TooltipItem } from 'chart.js';
 import { CountryData,CountryDataJSON,Participation } from '../../models/olympic.model';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { OlympicService } from '../../services/olympic.service';
 
 Chart.register(ChartDataLabels);
 
@@ -21,57 +22,35 @@ export class HomeComponent implements OnInit {
   public error!:string
   titlePage = "Medals per Country";
 
-  constructor(private router: Router, private http:HttpClient) { }
+  constructor(private router: Router, private olympicService: OlympicService) { }
 
   ngOnInit(): void {
-    this.http.get<CountryDataJSON[]>(this.olympicUrl).subscribe({ // on recup les donné sous forme d'interface pour s'assuré qu'elle sont propore
-      next: (rawData) => {
-        try {
-          // Transformer le JSON en instances de classe
-          const data: CountryData[] = rawData.map(
-            (c) =>
-              new CountryData(
-                c.id,
-                c.country,
-                c.participations.map(
-                  (p) =>
-                    new Participation(
-                      p.year,
-                      p.city,
-                      p.medalsCount,
-                      p.athleteCount
-                    )
-                )
-              )
-          );
+    
 
-          // Vérification que les données sont valides
-          if (!Array.isArray(data) || data.length === 0) {
-            this.error = 'No data available';
-            return;
-          }
-
-          // Liste des pays
-          const countries: string[] = data.map((c) => c.country);
-          this.totalCountries = countries.length;
-
-          // Calcul du nombre total de JO (années uniques)
-          const yearsSet = new Set<number>();
-          data.forEach((c) =>
-            c.participations.forEach((p) => yearsSet.add(p.year))
-          );
-          this.totalJOs = yearsSet.size;
-
-          // Création du Pie Chart
-          this.buildPieChart(data);
-        } catch (e) {
-          console.error('Error processing Olympic data:', e);
-          this.error = 'Error processing data';
+    this.olympicService.getAll().subscribe({
+      next: (data: CountryData[]) => {
+        if (!data || data.length === 0) {
+          this.error = 'No data available';
+          return;
         }
+
+        // Liste des pays
+        const countries: string[] = data.map((c) => c.country);
+        this.totalCountries = countries.length;
+
+        // Calcul du nombre total de JO (années uniques)
+        const yearsSet = new Set<number>();
+        data.forEach((c) =>
+          c.participations.forEach((p) => yearsSet.add(p.year))
+        );
+        this.totalJOs = yearsSet.size;
+
+        // Création du Pie Chart
+        this.buildPieChart(data);
       },
       error: (error: HttpErrorResponse) => {
         console.error('HTTP error loading Olympic data:', error);
-        this.error = error.message || 'Unknown error';
+        this.error = error.message || 'error loading Olympic data';
       },
     });
   }

@@ -1,8 +1,10 @@
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, ParamMap, Router} from '@angular/router';
 import Chart from 'chart.js/auto';
 import { CountryData,CountryDataJSON,Participation } from '../../models/olympic.model';
+import { OlympicService } from '../../services/olympic.service';
+import { switchMap } from 'rxjs/operators';
 
 
 @Component({
@@ -11,7 +13,7 @@ import { CountryData,CountryDataJSON,Participation } from '../../models/olympic.
   styleUrls: ['./country.component.scss']
 })
 export class CountryComponent implements OnInit {
-  private olympicUrl = './assets/mock/olympic.json';
+
   public lineChart!: Chart<"line", (number | string)[], number>;
   public titlePage = '';
   public totalEntries = 0;
@@ -19,67 +21,50 @@ export class CountryComponent implements OnInit {
   public totalAthletes = 0;
   public error!: string;
 
-  constructor(private route: ActivatedRoute,private router: Router, private http: HttpClient) {
-  }
+  constructor(private route: ActivatedRoute,private router: Router, private olympicService: OlympicService) {}
 
   ngOnInit() {
-    let countryName: string | null = null
-    this.route.paramMap.subscribe((param: ParamMap) => countryName = param.get('countryName'));
-    this.http.get<CountryDataJSON[]>(this.olympicUrl).subscribe({
-      next: (rawData) => {
-            try {
-              // Transformer le JSON en instances de classe
-              const data: CountryData[] = rawData.map(
-                (c) =>
-                  new CountryData(
-                    c.id,
-                    c.country,
-                    c.participations.map(
-                      (p) =>
-                        new Participation(
-                          p.year,
-                          p.city,
-                          p.medalsCount,
-                          p.athleteCount
-                        )
-                    )
-                  )
-              );
-            if (!countryName) { /* si il n'y a pas de nom au pays on peu rien en faire */ 
-              this.error = 'No country provided in route.';
-              return;
-            }
-            const selectedCountry = data.find(c => c.country === countryName); /* on cherche si le pays existe */
+    this.route.paramMap
+    .pipe(
+      // 1. On récupère le nom du pays dans l’URL
+      switchMap((params: ParamMap) => {
+        const countryName = params.get('countryName');
 
-            if (!selectedCountry) { /* si le pays n'est pas dans la liste on peu rien en faire */ 
-              this.error = 'Country not found.';
-              return;
-            }
-            /* on affiche les donné grace a l'objet pays obtenue */
-            this.titlePage = selectedCountry.country;
+        if (!countryName) {
+          this.error = 'No country provided in route.';
+          throw new Error('No country provided');
+        }
 
-            const participations = selectedCountry.participations;
+        // 2. On appelle le service qui renvoie un Observable<CountryData | undefined>
+        return this.olympicService.getByCountry(countryName);
+      })
+    )
+    .subscribe({
+      next: (country : CountryData | undefined ) => {
+        if (!country) {
+          this.error = 'Country not found.';
+          return;
+        }
 
-            this.totalEntries = participations.length;
-            const years = participations.map(p => p.year);
-            const medals = participations.map(p => p.medalsCount);
-            const athletes = participations.map(p => p.athleteCount);
+        // Ici tu as TON PAYS avec toutes ses données typées
+        this.titlePage = country.country;
 
-            this.totalMedals = medals.reduce((acc, m) => acc + m, 0);
-            this.totalAthletes = athletes.reduce((acc, a) => acc + a, 0);
+        this.totalEntries = country.participations.length;
+        this.totalMedals = country.totalMedals;
+        this.totalAthletes = country.totalAthletes;
 
-            this.buildChart(years, medals);
-            } catch (e) {
-              console.error('Error processing Olympic data:', e);
-              this.error = 'Error processing data';
-          }
-        },
-      error: (error: HttpErrorResponse) => {
-        console.error('HTTP error loading Olympic data:', error);
-        this.error = error.message || 'Unknown error';
-    },
-  });
-}
+        const years = country.participations.map(p => p.year);
+        const medals = country.participations.map(p => p.medalsCount);
+
+        // Tu construis ton graphique
+        this.buildChart(years, medals);
+      },
+      error: (err) => {
+        console.error(err);
+        this.error = 'Could not load country data.';
+      }
+    });
+  }
 
 
   buildChart(years: number[], medals: number[]) {
