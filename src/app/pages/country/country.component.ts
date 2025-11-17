@@ -1,8 +1,7 @@
 
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, ParamMap, Router} from '@angular/router';
-import Chart from 'chart.js/auto';
-import { CountryData,CountryDataJSON,Participation } from '../../models/olympic.model';
+import { CountryData} from '../../models/olympic.model';
 import { OlympicService } from '../../services/olympic.service';
 import { switchMap } from 'rxjs/operators';
 
@@ -14,12 +13,14 @@ import { switchMap } from 'rxjs/operators';
 })
 export class CountryComponent implements OnInit {
 
-  public lineChart!: Chart<"line", (number | string)[], number>;
   public titlePage = '';
   public totalEntries = 0;
   public totalMedals = 0;
   public totalAthletes = 0;
   public error!: string;
+
+  public chartYears: number[] = [];
+  public chartMedals: number[] = [];
 
   constructor(private route: ActivatedRoute,private router: Router, private olympicService: OlympicService) {}
 
@@ -53,46 +54,14 @@ export class CountryComponent implements OnInit {
         this.totalMedals = country.totalMedals;
         this.totalAthletes = country.totalAthletes;
 
-        const years = country.participations.map(p => p.year);
-        const medals = country.participations.map(p => p.medalsCount);
+        this.chartYears  = country.participations.map(p => p.year);
+        this.chartMedals  = country.participations.map(p => p.medalsCount);
 
-        // Tu construis ton graphique
-        this.buildChart(years, medals);
       },
       error: (err) => {
         console.error(err);
         this.error = 'Could not load country data.';
       }
     });
-  }
-
-
-  buildChart(years: number[], medals: number[]) {
-    // on delete si il existe déja pour pas crée de fuite mêmoire
-    if (this.lineChart) {
-      try {
-        this.lineChart.destroy();
-      } catch {
-        // ignore errors on destroy
-      }
-    }
-
-    const lineChart = new Chart("countryChart", {
-      type: 'line',
-      data: {
-        labels: years,
-        datasets: [
-          {
-            label: "medals",
-            data: medals,
-            backgroundColor: '#0b868f'
-          },
-        ]
-      },
-      options: {
-        aspectRatio: 2.5
-      }
-    });
-    this.lineChart = lineChart;
   }
 }

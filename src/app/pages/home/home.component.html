@@ -16,7 +16,13 @@
       </div>
     </div>
   </div>
-  <div style="width: 45%; margin: auto;">
-  <canvas id="DashboardPieChart">{{ pieChart }}</canvas>
+  <div>
+   <app-country-chart
+        [countries]="chartCountries"
+        [medals]="chartMedals"
+        [label]="'Medals'"
+        [backgroundColor]="['#0b868f', '#adc3de', '#7a3c53', '#8f6263', 'orange', '#94819d']"
+        (countrySelected)="onCountryChartSelect($event)"
+      ></app-country-chart>
   </div>
 </div>

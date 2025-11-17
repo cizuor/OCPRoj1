@@ -1,13 +1,8 @@
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Component, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
-import Chart from 'chart.js/auto';
-import type { Chart as ChartJS, ChartEvent, ActiveElement, TooltipItem } from 'chart.js';
-import { CountryData,CountryDataJSON,Participation } from '../../models/olympic.model';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { OlympicService } from '../../services/olympic.service';
 
-Chart.register(ChartDataLabels);
+import { CountryData } from '../../models/olympic.model';
+import { OlympicService } from '../../services/olympic.service';
 
 @Component({
   selector: 'app-home',
@@ -15,12 +10,15 @@ Chart.register(ChartDataLabels);
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  private olympicUrl = './assets/mock/olympic.json';
-  public pieChart!: Chart<"pie", number[], string>;
   public totalCountries = 0
   public totalJOs = 0
   public error!:string
   titlePage = "Medals per Country";
+
+
+  //variable accèssible pour le graphique
+  public chartCountries: string[] = [];
+  public chartMedals: number[] = [];
 
   constructor(private router: Router, private olympicService: OlympicService) { }
 
@@ -35,8 +33,13 @@ export class HomeComponent implements OnInit {
         }
 
         // Liste des pays
-        const countries: string[] = data.map((c) => c.country);
-        this.totalCountries = countries.length;
+        this.chartCountries = data.map((c) => c.country);
+        this.chartMedals = data.map(c => c.totalMedals);
+
+        this.totalCountries = this.chartCountries.length;
+
+        console.log(this.chartCountries)
+        console.log(this.chartMedals)
 
         // Calcul du nombre total de JO (années uniques)
         const yearsSet = new Set<number>();
@@ -45,113 +48,16 @@ export class HomeComponent implements OnInit {
         );
         this.totalJOs = yearsSet.size;
 
-        // Création du Pie Chart
-        this.buildPieChart(data);
       },
-      error: (error: HttpErrorResponse) => {
-        console.error('HTTP error loading Olympic data:', error);
-        this.error = error.message || 'error loading Olympic data';
+      error: (err) => {
+        console.error(err);
+        this.error = err.message || 'error loading Olympic data';
       },
     });
   }
-
-  buildPieChart(data: CountryData[]): void {
-
-    const countries = data.map(c => c.country);
-    const medals = data.map(c => c.totalMedals);
-
-    // identification du pays avec le plus de medailles
-    const maxMedals = Math.max(...medals);
-    const indexMax = medals.indexOf(maxMedals)
-    // delete si existe déja pour éviter les fuites mémoire
-    if (this.pieChart) {
-      try {
-        this.pieChart.destroy();
-      } catch {
-        // ignore errors on destroy
-      }
-    }
-    
-    const pieChart = new Chart("DashboardPieChart", {
-      type: 'pie',
-      data: {
-        labels: countries,
-        datasets: [{
-          label: 'Medals',
-          data: medals,
-          backgroundColor: ['#0b868f', '#adc3de', '#7a3c53', '#8f6263', 'orange', '#94819d'],
-          hoverOffset: 4
-        }],
-      },
-      options: {
-        layout: {
-          padding: {
-            top: 40,
-            bottom: 40,
-            left: 40,   // laisse plus de place à gauche
-            right: 40,  // laisse plus de place à droite
-          }
-        },
-        aspectRatio: 2.5,
-        plugins: {
-          tooltip: {
-            displayColors: false,
-            titleColor: '#fff',          // couleur du texte du titre
-            bodyColor: '#fff',           // couleur du texte du corps
-            backgroundColor: '#0b868f', // couleur fixe pour tous les tooltips
-            titleFont: {
-              weight: 'normal', // titre non gras
-              size: 12          // taille du texte si tu veux
-            },
-            callbacks: {
-              label: (tooltipItem) => {
-                const value = tooltipItem.raw as number;
-                if (tooltipItem.dataIndex === indexMax) {
-                  return `🏆${value} `;
-                }else{
-                  return ` ${value}`;
-                }
-              },
-            },
-          },
-          datalabels: {
-            color: '#111',
-            anchor: 'end',      // positionne le label à l'extérieur
-            align: 'end',       // aligne à la fin de la ligne
-            offset: 30,         // distance entre la tranche et le label
-            formatter: (value: number, ctx) =>
-              String(ctx.chart.data.labels ? ctx.chart.data.labels[ctx.dataIndex] : ''),font: {
-              weight: 'bold',
-              size: 15,
-            },
-            backgroundColor: 'rgba(255,255,255,0.8)',
-            borderRadius: 4,
-            padding: 4,
-            // clamp true évite que le label sorte du canvas si trop proche du bord
-            clamp: true,
-          },
-          legend: {
-            display: false,
-          }
-        },
-        onClick: (evt?: ChartEvent):void => {
-          // on trouve ou le click a été fait
-          const points: ActiveElement[] =
-            this.pieChart.getElementsAtEventForMode(
-              evt as unknown as Event,
-              'point',
-              { intersect: true },
-              true
-            );
-          if (points.length > 0) {
-            const index = points[0].index;
-            this.router.navigate(['country', countries[index]]);
-          } 
-        }
-      }
-      
-    });
-    this.pieChart = pieChart;
+  onCountryChartSelect(countryName: string): void {
+    this.router.navigate(['country', countryName]);
   }
+
 }
 

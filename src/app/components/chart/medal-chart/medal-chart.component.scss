@@ -1,0 +1,18 @@
+
+:host {
+  display: block; // Très important pour que width et margin: auto fonctionnent
+  width: 100%; // Prendra toute la largeur disponible de son parent
+
+  // Définissez une largeur maximale pour éviter que le graphique ne soit trop grand sur les écrans larges
+  max-width: 900px; // Ex: 900px, ajustez selon vos besoins
+
+  // Définissez une hauteur minimale si nécessaire, mais l'aspectRatio est souvent suffisant
+  // min-height: 300px; // Exemple
+}
+
+canvas {
+  // Ces règles sont importantes pour le responsive et le bon rendu de Chart.js
+  display: block;
+  width: 100% !important;
+  height: auto !important; // Maintient l'aspect ratio
+}
