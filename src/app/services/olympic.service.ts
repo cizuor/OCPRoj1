@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { Observable, throwError  } from 'rxjs';
+import { map, shareReplay, catchError } from 'rxjs/operators';
 import { CountryData, CountryDataJSON, Participation } from '../models/olympic.model';
 
 @Injectable({
@@ -17,6 +17,10 @@ export class OlympicService {
 
   constructor(private http: HttpClient) {}
 
+
+  clearCache(): void {
+    this.cache$ = undefined;
+  }
   /**
    * Charge toutes les données 
    */
@@ -43,7 +47,11 @@ export class OlympicService {
         ),
 
         // Transforme l’observable en cache permanent 
-        shareReplay(1)
+        shareReplay({ bufferSize: 1, refCount: true }),
+        catchError(err => {
+          this.cache$ = undefined;
+          return throwError(() => err);
+        })
       );
     }
 
