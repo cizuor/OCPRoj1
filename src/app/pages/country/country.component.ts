@@ -1,7 +1,7 @@
 
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, ParamMap, Router} from '@angular/router';
-import { CountryData} from '../../models/olympic.model';
+import { CountryData} from '../../models/CountryData';
 import { OlympicService } from '../../services/olympic.service';
 import { switchMap } from 'rxjs/operators';
 

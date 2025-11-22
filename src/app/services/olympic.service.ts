@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError  } from 'rxjs';
 import { map, shareReplay, catchError } from 'rxjs/operators';
-import { CountryData, CountryDataJSON, Participation } from '../models/olympic.model';
+import { CountryData} from '../models/CountryData';
+import { CountryDataJSON } from '../models/CountryDataJSON';
+import { Participation } from '../models/Participation';
 
 @Injectable({
   providedIn: 'root'   // <- garantit le singleton 
