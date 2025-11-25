@@ -16,6 +16,8 @@ export class HomeComponent implements OnInit {
   titlePage = "Medals per Country";
 
 
+  private _countryData!: CountryData[];
+
   //variable accèssible pour le graphique
   public chartCountries: string[] = [];
   public chartMedals: number[] = [];
@@ -25,36 +27,45 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     
 
-    this.olympicService.getAll().subscribe({
-      next: (data: CountryData[]) => {
-        if (!data || data.length === 0) {
-          this.error = 'No data available';
-          return;
-        }
+    // on souscrit a l'observable
+    this.olympicService.countryData$.subscribe({
+    next: (data) => {
+      this._countryData = data;
+      console.log("Données chargées :", data);
 
-        // Liste des pays
-        this.chartCountries = data.map((c) => c.country);
-        this.chartMedals = data.map(c => c.totalMedals);
+      if (!this._countryData || this._countryData.length === 0) {
+        this.error = 'No data available';
+        return;
+      }
+      // Trier par nombre total de médailles (ordre décroissant)
+      const sortedData = [...this._countryData].sort(
+        (a, b) => b.totalMedals - a.totalMedals
+      );
 
-        this.totalCountries = this.chartCountries.length;
+      // Liste des pays
+      this.chartCountries = sortedData.map((c) => c.country);
+      this.chartMedals = sortedData.map(c => c.totalMedals);
 
-        console.log(this.chartCountries)
-        console.log(this.chartMedals)
+      this.totalCountries = this.chartCountries.length;
 
-        // Calcul du nombre total de JO (années uniques)
-        const yearsSet = new Set<number>();
-        data.forEach((c) =>
-          c.participations.forEach((p) => yearsSet.add(p.year))
-        );
-        this.totalJOs = yearsSet.size;
 
-      },
-      error: (err) => {
-        console.error(err);
-        this.error = err.message || 'error loading Olympic data';
-      },
+      // Calcul du nombre total de JO (années uniques)
+      const yearsSet = new Set<number>();
+      this._countryData.forEach((c) =>
+        c.participations.forEach((p) => yearsSet.add(p.year))
+      );
+      this.totalJOs = yearsSet.size;
+
+
+    },
+    error: (err) => {
+      console.error("Erreur :", err);
+    }
+
     });
   }
+
+
   onCountryChartSelect(countryName: string): void {
     this.router.navigate(['country', countryName]);
   }

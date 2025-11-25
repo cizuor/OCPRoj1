@@ -1,7 +1,6 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, throwError  } from 'rxjs';
-import { map, shareReplay, catchError } from 'rxjs/operators';
+import { Injectable} from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { catchError, map, Observable, shareReplay, throwError  } from 'rxjs';
 import { CountryData} from '../models/CountryData';
 import { CountryDataJSON } from '../models/CountryDataJSON';
 import { Participation } from '../models/Participation';
@@ -10,62 +9,92 @@ import { Participation } from '../models/Participation';
   providedIn: 'root'   // <- garantit le singleton 
 })
 
-export class OlympicService {
+export class OlympicService{
 
-  private olympicUrl = 'assets/mock/olympic.json';
+  private _olympicUrl = 'assets/mock/olympic.json';
 
-  // Cache interne (singleton) -> chargé 1 seule fois
-  private cache$?: Observable<CountryData[]>;
+  //private _countryData!: Observable<CountryData[]>;
 
-  constructor(private http: HttpClient) {}
-
-
-  clearCache(): void {
-    this.cache$ = undefined;
+  constructor(private http: HttpClient) {
+    //this.loadData();
   }
-  /**
-   * Charge toutes les données 
-   */
-  getAll(): Observable<CountryData[]> {
-    if (!this.cache$) {
-      this.cache$ = this.http.get<CountryDataJSON[]>(this.olympicUrl).pipe(
 
-        // Conversion JSON -> classes CountryData
-        map(rawList =>
-          rawList.map(raw =>
-            new CountryData(
-              raw.id,
-              raw.country,
-              raw.participations.map(p =>
-                new Participation(
-                  p.year,
-                  p.city,
-                  p.medalsCount,
-                  p.athleteCount
-                )
-              )
+
+  public countryData$: Observable<CountryData[]> = this.http.get<CountryDataJSON[]>(this._olympicUrl).pipe(
+    // transformation JSON -> instances de classes
+    map((raw) =>
+      raw.map(
+        (c) =>
+          new CountryData(
+            c.id,
+            c.country,
+            c.participations.map(
+              (p) => new Participation(p.year, p.city, p.medalsCount, p.athleteCount)
             )
           )
-        ),
+      )
+    ),
+    // caturation / cache pour réutilisation sans refaire la requête
+    //bufferSize nombre de valeur gardé (la dernière en l'occurence)
+    //refCount: false on garde les donné même si personne les demande
+    shareReplay({ bufferSize: 1, refCount: false }),
+    // gestion d'erreur et transformation en Error observable
+    catchError((err: HttpErrorResponse) => {
+      console.error('Erreur HTTP dans OlympicService:', err);
+      return throwError(() => new Error('Impossible de charger les données olympiques'));
+    })
+  );
 
-        // Transforme l’observable en cache permanent 
-        shareReplay({ bufferSize: 1, refCount: true }),
-        catchError(err => {
-          this.cache$ = undefined;
-          return throwError(() => err);
-        })
-      );
+
+
+
+/* methode naive qui ne fonctionne pas car le HTTP est asynchrone
+  loadData(): void{
+      this.http.get<CountryDataJSON[]>(this._olympicUrl).subscribe({ // on recup les donné sous forme d'interface pour s'assuré qu'elle sont propore
+      next: (rawData) => {
+        try {
+          // Transformer le JSON en instances de classe
+          this._countryData = rawData.map(
+            (c) =>
+              new CountryData(
+                c.id,
+                c.country,
+                c.participations.map(
+                  (p) =>
+                    new Participation(
+                      p.year,
+                      p.city,
+                      p.medalsCount,
+                      p.athleteCount
+                    )
+                )
+              )
+          );
+          console.log('load data inside = ', this._countryData);
+        }catch (e) {
+          console.error('Error processing Olympic data:', e);
+          throwError(() => new Error('Error processing data')) ;
+        }
+          
+        },
+          error: (error: HttpErrorResponse) => {
+            console.error('HTTP error loading Olympic data:', error);
+            throwError(() => new Error(error.message|| 'Unknown error')) ;
+        },
+      });
+      console.log('load data = ' + this._countryData)
     }
+      */
 
-    return this.cache$;
+  //Charge toutes les données 
+  getAll$(): Observable<CountryData[]> {
+    return this.countryData$;
   }
 
-  /**
-   * Cherche un pays par nom
-   */
-  getByCountry(name: string): Observable<CountryData | undefined> {
-    return this.getAll().pipe(
-      map(list => list.find(c => c.country === name))
+  //Cherche un pays par nom
+  getByCountry$(name: string): Observable<CountryData|undefined> {
+    return this.getAll$().pipe(
+      map((countries) => countries.find((c) => c.country === name))
     );
   }
 }

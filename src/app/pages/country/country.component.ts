@@ -19,13 +19,46 @@ export class CountryComponent implements OnInit {
   public totalAthletes = 0;
   public error!: string;
 
+  private _countryData!: CountryData | undefined;
+
   public chartYears: number[] = [];
   public chartMedals: number[] = [];
 
   constructor(private route: ActivatedRoute,private router: Router, private olympicService: OlympicService) {}
 
   ngOnInit() {
-    this.route.paramMap
+
+    const countryName = this.route.snapshot.params['countryName'];
+    if (!countryName) {
+      this.error = 'No country provided in route.';
+      throw new Error('No country provided');
+    }
+
+    this.olympicService.getByCountry$(countryName).subscribe({
+      next: (country) => {
+        this._countryData = country;
+        console.log("Pays trouvé :", country);
+      },
+      error: (err) => {
+        console.error("Erreur :", err);
+      }
+    });
+    //this._countryData = this.olympicService.getByCountry$(countryName);
+     if (!this._countryData) {
+          this.error = 'Country not found.';
+          return;
+      }
+
+    this.titlePage = this._countryData.country;
+
+    this.totalEntries = this._countryData.participations.length;
+    this.totalMedals = this._countryData.totalMedals;
+    this.totalAthletes = this._countryData.totalAthletes;
+
+    this.chartYears  = this._countryData.participations.map(p => p.year);
+    this.chartMedals  = this._countryData.participations.map(p => p.medalsCount);
+
+    /*this.route.paramMap
     .pipe(
       // 1. On récupère le nom du pays dans l’URL
       switchMap((params: ParamMap) => {
@@ -62,6 +95,6 @@ export class CountryComponent implements OnInit {
         console.error(err);
         this.error = 'Could not load country data.';
       }
-    });
+    });*/
   }
 }
