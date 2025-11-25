@@ -1,9 +1,8 @@
 
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, ParamMap, Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { CountryData} from '../../models/CountryData';
 import { OlympicService } from '../../services/olympic.service';
-import { switchMap } from 'rxjs/operators';
 
 
 @Component({
@@ -96,5 +95,11 @@ export class CountryComponent implements OnInit {
         this.error = 'Could not load country data.';
       }
     });*/
+  }
+
+
+  onBackMenu():void
+  {
+    this.router.navigateByUrl(``);
   }
 }

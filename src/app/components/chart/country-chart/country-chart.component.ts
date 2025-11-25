@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges, ElementRef, ViewChild, Output, EventEmitter,AfterViewInit,OnDestroy  } from '@angular/core';
 import Chart from 'chart.js/auto';
-import type { ChartEvent, ActiveElement, TooltipItem } from 'chart.js';
+import type { ChartEvent, ActiveElement } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 Chart.register(ChartDataLabels);
