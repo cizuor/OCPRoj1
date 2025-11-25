@@ -50,6 +50,7 @@ export class MedalChartComponent implements OnChanges {
         options: {
           responsive: true,
           maintainAspectRatio: true,
+          backgroundColor: 'transparent',
           aspectRatio: this.aspectRatio,
           scales: {
             y: {

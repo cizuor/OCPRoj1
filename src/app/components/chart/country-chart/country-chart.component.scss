@@ -2,17 +2,12 @@
   display: block; // Très important pour que width et margin: auto fonctionnent
   width: 100%; // Prendra toute la largeur disponible de son parent
   max-width: 600px; // Une largeur maximale raisonnable pour le graphique circulaire
-  margin: 20px auto; // Centre le graphique et ajoute de la marge verticale
+  margin: auto; // Centre le graphique et ajoute de la marge verticale
 
   // Tu peux ajouter des styles visuels ici si tu veux
   padding: 15px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-canvas {
-  display: block;
-  width: 100% !important;  // Pour s'assurer qu'il prend la largeur de son hôte
-  height: auto !important; // Maintient l'aspect ratio
+  background-color: transparent;
+  border-radius: 15px;
+  border: none;
+  box-shadow: none ;
 }

@@ -84,10 +84,10 @@ export class CountryChartComponent implements OnChanges, AfterViewInit {
       options: {
         layout: {
           padding: {
-            top: 40,
-            bottom: 40,
-            left: 40,
-            right: 40,
+            top: 60,
+            bottom: 60,
+            left: 60,
+            right: 60,
           }
         },
         aspectRatio: this.aspectRatio,

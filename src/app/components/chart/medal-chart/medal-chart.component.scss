@@ -2,9 +2,16 @@
 :host {
   display: block; // Très important pour que width et margin: auto fonctionnent
   width: 100%; // Prendra toute la largeur disponible de son parent
+  height: 100%;
 
   // Définissez une largeur maximale pour éviter que le graphique ne soit trop grand sur les écrans larges
-  max-width: 900px; // Ex: 900px, ajustez selon vos besoins
+  max-width: 1500px; 
+  margin: 20px auto; 
+  max-height: 1500px; 
+  height: auto; 
+  padding: 15px;
+  background-color: transparent;
+  border-radius: 15px;
 
   // Définissez une hauteur minimale si nécessaire, mais l'aspectRatio est souvent suffisant
   // min-height: 300px; // Exemple
