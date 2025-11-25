@@ -91,6 +91,7 @@ export class CountryChartComponent implements OnChanges, AfterViewInit {
           }
         },
         aspectRatio: this.aspectRatio,
+        responsive: true,
         plugins: {
           tooltip: {
             displayColors: false,

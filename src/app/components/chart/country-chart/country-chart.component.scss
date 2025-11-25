@@ -1,7 +1,9 @@
 :host {
   display: block; // Très important pour que width et margin: auto fonctionnent
   width: 100%; // Prendra toute la largeur disponible de son parent
-  max-width: 600px; // Une largeur maximale raisonnable pour le graphique circulaire
+  height: 100%;
+  max-width: 1000px; // Une largeur maximale raisonnable pour le graphique circulaire
+  max-height: 1000px; // Une largeur maximale raisonnable pour le graphique circulaire
   margin: auto; // Centre le graphique et ajoute de la marge verticale
 
   // Tu peux ajouter des styles visuels ici si tu veux
