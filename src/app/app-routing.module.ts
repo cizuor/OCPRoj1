@@ -20,7 +20,8 @@ const routes: Routes = [
   },
   {
     path: '**',
-    component: NotFoundComponent,
+    redirectTo: 'not-found',
+    pathMatch: 'full'
   },
 ];
 

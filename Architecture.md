@@ -14,7 +14,9 @@ Ce projet Angular affiche des statistiques olympiques à partir d’un fichier J
     │    │            └── medal-chart/
     │    │
     │    ├── models/
-    │    │      └── olympic.model.ts
+    │    │      └── CountryData.ts
+    │    │      ├── CountryDataJSON.ts
+    │    │      └── Participation.ts
     │    │
     │    ├── pages/
     │    │      ├── home/
@@ -66,23 +68,43 @@ Ce projet Angular affiche des statistiques olympiques à partir d’un fichier J
         Favorise la maintenance et les tests    
 
     📁 models/
-    ✔ olympic.model.ts
+    ✔ CountryDataJSON.ts
 
-        Contient les structures de données du projet :
+        Contient les structures de données utilisé dans olympic.json :
 
         CountryDataJSON : interface utilisée pour lire les données brutes depuis le JSON
-
-        Participation : classe représentant une participation aux JO
-
-        CountryData : classe contenant les participations + des propriétés calculées (ex : totalMedals)
 
     ➕ Avantages
 
         Mappage clair entre JSON brut et objets métier typés
 
+        Facilite l’évolution en cas d’API réelle
+
+    ✔ Participation.ts
+
+        Contient les structures de données utilisé dans olympic.json :
+
+        Participation : classe représentant une participation aux JO
+
+    ➕ Avantages
+
         Encapsulation des calculs (total médailles, total athlètes…)
 
         Facilite l’évolution en cas d’API réelle
+
+    ✔ CountryDataJSON.ts
+
+        Contient les methode utile pour simplifier et code :
+
+        CountryData : classe contenant les participations + des propriétés calculées (ex : totalMedals)
+
+    ➕ Avantages
+
+        Encapsulation des calculs (total médailles, total athlètes…)
+
+        Facilite l’évolution en cas d’API réelle
+
+
 
     📁 pages/
 

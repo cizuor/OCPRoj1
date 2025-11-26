@@ -36,15 +36,12 @@ export class CountryComponent implements OnInit {
     this.olympicService.getByCountry$(countryName).subscribe({
       next: (country) => {
         this._countryData = country;
-        console.log("Pays trouvé :", country);
-      },
-      error: (err) => {
-        console.error("Erreur :", err);
       }
     });
     //this._countryData = this.olympicService.getByCountry$(countryName);
      if (!this._countryData) {
           this.error = 'Country not found.';
+          this.router.navigateByUrl(`not-found`);
           return;
       }
 
