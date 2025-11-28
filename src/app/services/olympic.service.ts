@@ -13,10 +13,8 @@ export class OlympicService{
 
   private _olympicUrl = 'assets/mock/olympic.json';
 
-  //private _countryData!: Observable<CountryData[]>;
 
   constructor(private http: HttpClient) {
-    //this.loadData();
   }
 
 

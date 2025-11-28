@@ -13,7 +13,7 @@ import { OlympicService } from '../../services/olympic.service';
 export class HomeComponent implements OnInit, OnDestroy {
   public totalCountries = 0
   public totalJOs = 0
-  public error!:string
+  public error: string | null = null;
   titlePage = "Medals per Country";
 
 
@@ -34,6 +34,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     //takeUntil(this.destroy$) permet de s'abboné jusqu'a la destruction
     this.olympicService.countryData$.pipe(takeUntil(this.destroy$)).subscribe({
     next: (data) => {
+      this.error = null; // reset
       this._countryData = data;
       console.log("Données chargées :", data);
 
@@ -64,6 +65,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     },
     error: (err) => {
       console.error("Erreur :", err);
+      this.error = err.message;
     }
 
     });
