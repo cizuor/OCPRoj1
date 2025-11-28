@@ -46,46 +46,6 @@ export class OlympicService{
   );
 
 
-
-
-/* methode naive qui ne fonctionne pas car le HTTP est asynchrone
-  loadData(): void{
-      this.http.get<CountryDataJSON[]>(this._olympicUrl).subscribe({ // on recup les donné sous forme d'interface pour s'assuré qu'elle sont propore
-      next: (rawData) => {
-        try {
-          // Transformer le JSON en instances de classe
-          this._countryData = rawData.map(
-            (c) =>
-              new CountryData(
-                c.id,
-                c.country,
-                c.participations.map(
-                  (p) =>
-                    new Participation(
-                      p.year,
-                      p.city,
-                      p.medalsCount,
-                      p.athleteCount
-                    )
-                )
-              )
-          );
-          console.log('load data inside = ', this._countryData);
-        }catch (e) {
-          console.error('Error processing Olympic data:', e);
-          throwError(() => new Error('Error processing data')) ;
-        }
-          
-        },
-          error: (error: HttpErrorResponse) => {
-            console.error('HTTP error loading Olympic data:', error);
-            throwError(() => new Error(error.message|| 'Unknown error')) ;
-        },
-      });
-      console.log('load data = ' + this._countryData)
-    }
-      */
-
   //Charge toutes les données 
   getAll$(): Observable<CountryData[]> {
     return this.countryData$;

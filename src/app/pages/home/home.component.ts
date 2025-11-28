@@ -1,5 +1,6 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 
 import { CountryData } from '../../models/CountryData';
 import { OlympicService } from '../../services/olympic.service';
@@ -9,7 +10,7 @@ import { OlympicService } from '../../services/olympic.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   public totalCountries = 0
   public totalJOs = 0
   public error!:string
@@ -22,13 +23,16 @@ export class HomeComponent implements OnInit {
   public chartCountries: string[] = [];
   public chartMedals: number[] = [];
 
+  private destroy$ = new Subject<void>();
+
   constructor(private router: Router, private olympicService: OlympicService) { }
 
   ngOnInit(): void {
     
 
     // on souscrit a l'observable
-    this.olympicService.countryData$.subscribe({
+    //takeUntil(this.destroy$) permet de s'abboné jusqu'a la destruction
+    this.olympicService.countryData$.pipe(takeUntil(this.destroy$)).subscribe({
     next: (data) => {
       this._countryData = data;
       console.log("Données chargées :", data);
@@ -63,6 +67,11 @@ export class HomeComponent implements OnInit {
     }
 
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
 
