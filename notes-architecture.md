@@ -3,3 +3,5 @@ Le projet contien des any partout ce qui nuit a la bonne gestion des objet,
 le projet contien des fuite mêmoire,
 le projet possède l'affichage et l'inteligence dans les même fichier,
 les appel http on lieux a chaque ouverture de page, au lieux d'étre centraliser,
+
+![image du code avec les chart dans le code des pages](capture1.png)

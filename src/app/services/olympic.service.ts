@@ -34,7 +34,7 @@ export class OlympicService{
           )
       )
     ),
-    // caturation / cache pour réutilisation sans refaire la requête
+
     //bufferSize nombre de valeur gardé (la dernière en l'occurence)
     //refCount: false on garde les donné même si personne les demande
     shareReplay({ bufferSize: 1, refCount: false }),
