@@ -36,7 +36,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     next: (data) => {
       this.error = null; // reset
       this._countryData = data;
-      console.log("Données chargées :", data);
 
       if (!this._countryData || this._countryData.length === 0) {
         this.error = 'No data available';
@@ -64,7 +63,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     },
     error: (err) => {
-      console.error("Erreur :", err);
       this.error = err.message;
     }
 

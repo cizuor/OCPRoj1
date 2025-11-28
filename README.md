@@ -1,3 +1,5 @@
+
+Voici mon repos git:
 https://github.com/cizuor/OCPRoj1
 
 # OlympicGamesStarter
@@ -15,6 +17,9 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The appli
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
 ## Where to start
+
+The architecture can be found in [Architecture.md](Architecture.md)
+
 
 As you can see, an architecture has already been defined for the project. It is just a suggestion, you can choose to use your own. The predefined architecture includes (in addition to the default angular architecture) the following:
 
